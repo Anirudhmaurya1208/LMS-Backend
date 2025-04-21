@@ -43,10 +43,30 @@ public class CourseController {
 //        Course savedCourse = courseService.saveCourse(courseDTO);
 //        return ResponseEntity.status(201).body(savedCourse);  // 201 Created status for resource creation
 //    }
-    @PostMapping
-    public ResponseEntity<?> createCourse(@RequestBody @Valid CourseDTO courseDTO) {
+//    @PostMapping(consumes = "multipart/form-data")
+//    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, "multipart/form-data;charset=UTF-8" })
 //
 //    public ResponseEntity<?> createCourse(@ModelAttribute @Valid CourseDTO courseDTO) {
+//        try {
+//            List<ChapterDTO> parsedChapters = objectMapper.readValue(
+//                courseDTO.getChapters(),
+//                new TypeReference<List<ChapterDTO>>() {}
+//            );
+//
+//            MultipartFile courseImage = courseDTO.getImage();
+//            String title = courseDTO.getCourseTitle();
+//
+//            // save logic here...
+//
+//            return ResponseEntity.ok("Course created successfully!");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body("Failed to create course: " + e.getMessage());
+//        }
+//    }
+    @PostMapping
+    public ResponseEntity<?> createCourse(@ModelAttribute @Valid CourseDTO courseDTO) {
         try {
             List<ChapterDTO> parsedChapters = objectMapper.readValue(
                 courseDTO.getChapters(),
@@ -56,7 +76,7 @@ public class CourseController {
             MultipartFile courseImage = courseDTO.getImage();
             String title = courseDTO.getCourseTitle();
 
-            // save logic here...
+            // Save logic...
 
             return ResponseEntity.ok("Course created successfully!");
         } catch (Exception e) {

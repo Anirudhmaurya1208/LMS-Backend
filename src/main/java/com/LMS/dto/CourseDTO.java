@@ -30,7 +30,7 @@ public class CourseDTO {
     private MultipartFile image; // 🆕 File upload
 
     @NotNull(message = "Chapters cannot be null")
-    private List<ChapterDTO> chapters; // Directly map JSON to a list of ChapterDTOs
+    private String chapters; // Directly map JSON to a list of ChapterDTOs
  // 🆕 Will be a JSON string (sent from frontend)
 
     private String educatorId;
