@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Entity
@@ -27,11 +30,17 @@ public class Course {
 
     private Integer discount;
 
-    private String image;  // URL or file path for course image
+//    private Multipartfile image;  // URL or file path for course image
+    @Lob
+    @Column(name = "image", columnDefinition = "LONGBLOB")
+    private byte[] image;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Chapter> chapters;
+//    @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, orphanRemoval = true)
+//    @JsonManagedReference
+//    private List<Chapter> chapters;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Chapter> chapters = new ArrayList<>();
+
 
     @ManyToOne
     @JoinColumn(name = "educator_id")

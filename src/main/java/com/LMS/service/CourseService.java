@@ -9,6 +9,7 @@ import com.LMS.repository.EducatorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -17,25 +18,48 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final EducatorRepository educatorRepository;
-
-    public Course saveCourse(CourseDTO courseDTO) {
+    
+    public Course saveCourse(CourseDTO courseDTO) throws IOException {
+        // Fetch the Educator from the database using educatorId
         Educator educator = educatorRepository.findById(courseDTO.getEducatorId())
-                .orElseThrow(() -> new RuntimeException("Educator not found"));
+            .orElseThrow(() -> new RuntimeException("Educator not found"));
 
-        Course course = Course.builder()
-                .courseTitle(courseDTO.getCourseTitle())
-                .coursePrice(courseDTO.getCoursePrice())
-                .discount(courseDTO.getDiscount())
-                .image(courseDTO.getImage())
-                .educator(educator)
-                .build();
+        // Create the Course object and set the educator
+        Course course = new Course();
+        course.setCourseTitle(courseDTO.getCourseTitle());
+        course.setCoursePrice(courseDTO.getCoursePrice());
+        course.setDiscount(courseDTO.getDiscount());
 
-        List<Chapter> chapters = buildChaptersFromDTO(courseDTO.getChapters(), course);
-        course.setChapters(chapters);
+        // Convert the image to a byte array
+        course.setImage(courseDTO.getImage().getBytes()); // Save image as byte array
+
+        course.setEducator(educator);  // Set the educator
+
+        // Convert ChapterDTOs into Chapter entities and save
+        for (ChapterDTO chapterDTO : courseDTO.getParsedChapters()) {
+            Chapter chapter = new Chapter();
+            chapter.setChapterTitle(chapterDTO.getChapterTitle());
+            chapter.setChapterOrder(chapterDTO.getChapterOrder());
+            chapter.setCourse(course);  // Associate the chapter with the course
+
+            // Add lectures to chapter
+            for (LectureDTO lectureDTO : chapterDTO.getChapterContent()) {
+                Lecture lecture = new Lecture();
+                lecture.setLectureTitle(lectureDTO.getLectureTitle());
+                lecture.setLectureUrl(lectureDTO.getLectureUrl());
+                lecture.setLectureDuration(lectureDTO.getLectureDuration());
+                lecture.setIsPreviewFree(lectureDTO.isPreviewFree());
+                chapter.getLectures().add(lecture);
+            }
+
+            course.getChapters().add(chapter);  // Add chapter to course
+        }
 
         return courseRepository.save(course);
     }
-
+    
+    
+    
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
     }
@@ -59,7 +83,8 @@ public class CourseService {
         existing.setDiscount(updatedCourseDTO.getDiscount());
         existing.setImage(updatedCourseDTO.getImage());
 
-        List<Chapter> updatedChapters = buildChaptersFromDTO(updatedCourseDTO.getChapters(), existing);
+        List<Chapter> chapters = buildChaptersFromDTO(courseDTO.getParsedChapters(), course);
+
 
         existing.getChapters().clear();
         existing.getChapters().addAll(updatedChapters);

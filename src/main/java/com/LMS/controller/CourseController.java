@@ -65,26 +65,56 @@ public class CourseController {
 //                .body("Failed to create course: " + e.getMessage());
 //        }
 //    }
-    @PostMapping
+//    @PostMapping
+//    public ResponseEntity<?> createCourse(@ModelAttribute @Valid CourseDTO courseDTO) {
+//        try {
+//            List<ChapterDTO> parsedChapters = objectMapper.readValue(
+//                courseDTO.getChapters(),
+//                new TypeReference<List<ChapterDTO>>() {}
+//            );
+//
+//            MultipartFile courseImage = courseDTO.getImage();
+//            String title = courseDTO.getCourseTitle();
+//
+//            // Save logic...
+//
+//            return ResponseEntity.ok("Course created successfully!");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body("Failed to create course: " + e.getMessage());
+//        }
+//    }
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<?> createCourse(@ModelAttribute @Valid CourseDTO courseDTO) {
         try {
+            System.out.println("Received Course: " + courseDTO.getCourseTitle());
+            System.out.println("Chapters JSON: " + courseDTO.getChapters());
+
+            // Validate image
+            if (courseDTO.getImage() != null) {
+                System.out.println("Image: " + courseDTO.getImage().getOriginalFilename());
+            } else {
+                System.out.println("No image provided.");
+            }
+
+            // ✅ Parse chapters string
             List<ChapterDTO> parsedChapters = objectMapper.readValue(
                 courseDTO.getChapters(),
                 new TypeReference<List<ChapterDTO>>() {}
             );
+            courseDTO.setParsedChapters(parsedChapters); // Set parsed chapters to DTO manually
 
-            MultipartFile courseImage = courseDTO.getImage();
-            String title = courseDTO.getCourseTitle();
+            Course savedCourse = courseService.saveCourse(courseDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCourse); // Return saved course
 
-            // Save logic...
-
-            return ResponseEntity.ok("Course created successfully!");
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Failed to create course: " + e.getMessage());
         }
     }
+
 
 
     @GetMapping
@@ -114,7 +144,8 @@ public class CourseController {
 
         Course updatedCourse = courseService.updateCourse(id, updatedCourseDTO);
         if (updatedCourse != null) {
-            return ResponseEntity.ok(updatedCourse);
+        	return ResponseEntity.ok("Course updated successfully");
+
         } else {
             return ResponseEntity.notFound().build();  // 404 if course not found
         }

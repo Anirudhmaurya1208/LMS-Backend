@@ -1,13 +1,11 @@
 package com.LMS.dto;
 
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 @Data
 @NoArgsConstructor
@@ -26,7 +24,12 @@ public class LectureDTO {
     private String lectureUrl;
 
     private boolean isPreviewFree;  // Indicates if the lecture preview is free
+    public boolean isPreviewFree() {
+        return isPreviewFree;
+    }
 
     @NotNull(message = "Lecture order cannot be null")
     private int lectureOrder;  // Order in the chapter for display
+
+    // Lombok will automatically generate the getter and setter methods for isPreviewFree
 }
